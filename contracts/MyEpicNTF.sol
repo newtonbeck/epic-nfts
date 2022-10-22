@@ -15,12 +15,14 @@ contract MyEpicNFT is ERC721URIStorage {
 
     event NewEpicNFTMinted(address sender, uint256 tokenId);
 
-    string prefixSvg = "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='black' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
+    string prefixSvgBeforeColor = "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='";
+    string prefixSvgAfterColor = "' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
     string suffixSvg = "</text></svg>";
 
     string[] firstWords = ["Fantastic","Epic","Terrible","Crazy","Wild","Terrifying","Spooky","Horrible","Giant","Loudy","Insane","Talkative","Curious","Hungry","Sleepy"];
     string[] secondWords = ["Pizza","Cupcake","Kebab","Pasta","Tiramisu","Hamburger","Popcorn","Icecream","Hotdog","Hummus","Cheese","Bread","Sushi","Lamen","Croissant"];
     string[] thirdWords = ["Gollum","Bilbo","Gandalf","Sauron","Galadriel","Elrond","Gimli","Frodo","Sam","Aragorn","Arathorn","Elendil","Saruman","Legolas","Pippin"];
+    string[] bgColors = ["black","darkgreen","darkblue","darkred","darkgray","darkorange"];
 
     constructor() ERC721 ("SquareNFT", "SQUARE") {
         console.log("This is my NFT contract! Whoa!");
@@ -48,6 +50,12 @@ contract MyEpicNFT is ERC721URIStorage {
         return thirdWords[rand];
     }
 
+    function pickRandomColor(uint256 tokenId) internal view returns (string memory) {
+        uint256 rand = random(string(abi.encodePacked("COLOR", Strings.toString(tokenId))));
+        rand = rand % bgColors.length;
+        return bgColors[rand];
+    }
+
     function makeAnEpicNFT() public {
         uint256 newItemId = _tokenIds.current();
 
@@ -56,10 +64,11 @@ contract MyEpicNFT is ERC721URIStorage {
         string memory firstWord = pickFirstRandomWord(newItemId);
         string memory secondWord = pickSecondRandomWord(newItemId);
         string memory thirdWord = pickThirdRandomWord(newItemId);
+        string memory color = pickRandomColor(newItemId);
 
         string memory text = string(abi.encodePacked(firstWord, secondWord, thirdWord));
         
-        string memory svg = createSvgDinamically(text);
+        string memory svg = createSvgDinamically(color, text);
         string memory encodedJson = createEncodedJsonDinamically(svg, text);
 
         console.log("Token URI is %s", encodedJson);
@@ -73,8 +82,8 @@ contract MyEpicNFT is ERC721URIStorage {
         emit NewEpicNFTMinted(msg.sender, newItemId);
     }
 
-    function createSvgDinamically(string memory text) internal view returns (string memory) {
-        return string(abi.encodePacked(prefixSvg, text, suffixSvg));
+    function createSvgDinamically(string memory color, string memory text) internal view returns (string memory) {
+        return string(abi.encodePacked(prefixSvgBeforeColor, color, prefixSvgAfterColor, text, suffixSvg));
     }
 
     function createEncodedJsonDinamically(string memory svg, string memory text) internal pure returns (string memory) {

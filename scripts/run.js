@@ -8,7 +8,7 @@ const main = async () => {
 
     console.log("Contract deployed to:", myEpicNFT.address);
 
-    for (var i = 0; i < 20; i++) {
+    for (var i = 0; i < 2; i++) {
         const txn = await myEpicNFT.makeAnEpicNFT();
         await txn.wait();
         console.log(`Minted NFT #${i}`);
